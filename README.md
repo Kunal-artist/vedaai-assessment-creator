@@ -4,6 +4,10 @@ A full-stack, AI-powered assessment creator designed to simplify the workflow fo
 
 This project was built to satisfy the VedaAI Full Stack Engineering Assignment.
 
+## 🔗 Live Demo
+
+- Frontend: [Vercel](https://vedaai-assessment-creator-frontend.vercel.app/)
+
 ## 🚀 Key Features
 
 *   **Intelligent AI Generation:** Converts user input into a highly structured prompt to generate strictly formatted JSON from the Gemini API. Avoids raw text dumping.
@@ -19,7 +23,7 @@ This project was built to satisfy the VedaAI Full Stack Engineering Assignment.
 The system is split into two primary components communicating via REST and WebSockets:
 
 ### Frontend (Next.js + TypeScript)
-*   **Framework:** Next.js (App Router bypassed for SPAs, client-side rendering)
+*   **Framework:** Next.js (App Router bypassed for SPAs, client-side rendering) + TypeScript
 *   **State Management:** Zustand
 *   **Styling:** Custom CSS implementing the design system
 *   **Real-time:** Socket.io-client
@@ -40,49 +44,82 @@ The system is split into two primary components communicating via REST and WebSo
 ## ⚙️ Local Setup Instructions
 
 ### Prerequisites
-*   Node.js (v18+)
-*   MongoDB Cluster URL (e.g., Atlas)
-*   Gemini API Key
 
-### 1. Clone & Install
-\`\`\`bash
-git clone <your-repo-url>
+- Node.js (v18+)
+- MongoDB Atlas URI
+- Gemini API Key
+
+---
+
+## 1. Clone & Install
+
+```bash
+git clone https://github.com/Kunal-artist/vedaai-assessment-creator
 cd VedaAI-main
 
-# Install dependencies for both backend and frontend workspaces
+# Install dependencies for all workspaces
 npm install
-\`\`\`
+```
 
-### 2. Environment Variables
-Create a `.env` file in `apps/backend/`:
-\`\`\`env
+---
+
+## 2. Environment Variables
+
+### Backend (`apps/backend/.env`)
+
+```env
 PORT=5001
+
 MONGODB_URI=mongodb+srv://<user>:<password>@cluster.mongodb.net/vedaai
+
 GEMINI_API_KEY=your_gemini_api_key
-REDIS_URL=redis://127.0.0.1:6379 # Optional: If BullMQ is enabled
+
+REDIS_URL=redis://127.0.0.1:6379
+
 FRONTEND_ORIGIN=http://localhost:3000
-\`\`\`
+```
 
-Create a `.env.local` file in `apps/frontend/`:
-\`\`\`env
+> `REDIS_URL` is optional if BullMQ is not enabled locally.
+
+---
+
+### Frontend (`apps/frontend/.env.local`)
+
+```env
 NEXT_PUBLIC_API_URL=http://localhost:5001/api
+
 NEXT_PUBLIC_SOCKET_URL=http://localhost:5001
-\`\`\`
+```
 
-### 3. Run Development Servers
-You will need two terminal windows.
+---
 
-**Terminal 1 (Backend):**
-\`\`\`bash
+## 3. Run Development Servers
+
+Open two terminal windows.
+
+### Terminal 1 — Backend
+
+```bash
 cd apps/backend
 npm run dev
-\`\`\`
+```
 
-**Terminal 2 (Frontend):**
-\`\`\`bash
+### Terminal 2 — Frontend
+
+```bash
 cd apps/frontend
 npm run dev
-\`\`\`
+```
+
+---
+
+## 4. Open Application
+
+Visit:
+
+```txt
+http://localhost:3000
+```
 
 Navigate to `http://localhost:3000` to view the application.
 
