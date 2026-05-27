@@ -8,6 +8,12 @@ This project was built to satisfy the VedaAI Full Stack Engineering Assignment.
 
 - Frontend: [Vercel](https://vedaai-assessment-creator-frontend.vercel.app/)
 
+## 👨‍💻 Author
+
+Kunal Likhitkar
+
+- Email: kunallikhitkar31@gmail.com
+
 ## 🚀 Key Features
 
 *   **Intelligent AI Generation:** Converts user input into a highly structured prompt to generate strictly formatted JSON from the Gemini API. Avoids raw text dumping.
