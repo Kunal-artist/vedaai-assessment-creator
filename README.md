@@ -47,6 +47,17 @@ The system is split into two primary components communicating via REST and WebSo
 4.  **Complete:** The worker updates the MongoDB document with the parsed result sections (or marks it `failed`).
 5.  **Notify:** The backend emits an event via Socket.io to the specific room for that assignment ID. The frontend instantly re-fetches the updated data and transitions the UI from the "Generating..." spinner to the rendered exam paper.
 
+## 📦 Repository Structure
+
+```text
+VedaAI-main/
+├── apps/
+│   ├── frontend/   # Next.js + Zustand + Socket.io client
+│   └── backend/    # Express + MongoDB + WebSockets + AI workers
+├── package.json
+└── README.md
+```
+
 ## ⚙️ Local Setup Instructions
 
 ### Prerequisites
