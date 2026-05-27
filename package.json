@@ -1,0 +1,12 @@
+{
+  "name": "vedaai-assessment-creator",
+  "private": true,
+  "workspaces": ["apps/frontend", "apps/backend"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev -w apps/backend\" \"npm run dev -w apps/frontend\"",
+    "build": "npm run build -w apps/backend && npm run build -w apps/frontend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}
