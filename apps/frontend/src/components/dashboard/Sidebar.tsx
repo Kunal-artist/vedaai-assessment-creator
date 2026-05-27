@@ -7,10 +7,10 @@ import {
   Cpu,
   Library,
   Settings,
-  Plus,
-  Sparkles,
 } from "lucide-react";
-import { useAssignmentStore } from "../store/useAssignmentStore";
+import { useAssignmentStore } from "../../store/useAssignmentStore";
+import CreateAssignmentButton from "./CreateAssignmentButton";
+import UserProfileCard from "./UserProfileCard";
 
 const NAV_ITEMS = [
   { icon: Home, label: "Home", id: "home" },
@@ -28,28 +28,11 @@ export default function Sidebar() {
     <aside className="sidebar">
       {/* Logo */}
       <div className="sidebar-logo">
-        <div className="sidebar-logo-icon" style={{
-          background: 'linear-gradient(135deg, #f97316, #ea580c)',
-          borderRadius: '10px'
-        }}>
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4 4l8 16 8-16" />
-          </svg>
-        </div>
+        <img src="/logo.png" alt="VedaAI Logo" width={32} height={32} className="sidebar-logo-img" />
         <span className="sidebar-logo-text">VedaAI</span>
       </div>
 
-      {/* Create Assignment CTA */}
-      <button
-        className="sidebar-create-btn"
-        onClick={() => setView("create")}
-        id="sidebar-create-btn"
-      >
-        <div style={{ background: '#f97316', borderRadius: '50%', padding: '2px', display: 'flex' }}>
-          <Sparkles size={12} color="white" fill="white" />
-        </div>
-        <span>Create Assignment</span>
-      </button>
+      <CreateAssignmentButton />
 
       {/* Navigation */}
       <nav className="sidebar-nav">
@@ -76,19 +59,12 @@ export default function Sidebar() {
       </nav>
 
       {/* Settings */}
-      <button className="nav-item" style={{ marginTop: 8 }} id="nav-settings">
+      <button className="nav-item" id="nav-settings">
         <Settings className="nav-icon" size={16} />
         <span>Settings</span>
       </button>
 
-      {/* School Info */}
-      <div className="sidebar-footer">
-        <div className="sidebar-footer-avatar">D</div>
-        <div className="sidebar-footer-info">
-          <div className="sidebar-footer-name">Delhi Public School</div>
-          <div className="sidebar-footer-sub">Bokaro Steel City</div>
-        </div>
-      </div>
+      <UserProfileCard />
     </aside>
   );
 }

@@ -5,6 +5,7 @@ export interface Question {
   options?: string[];
   difficulty: Difficulty;
   marks: number;
+  answer?: string;
 }
 
 export interface QuestionSection {

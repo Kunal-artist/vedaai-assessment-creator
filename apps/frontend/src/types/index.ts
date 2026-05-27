@@ -9,6 +9,7 @@ export interface Question {
   options?: string[];
   difficulty: "easy" | "medium" | "hard";
   marks: number;
+  answer?: string;
 }
 
 export interface Section {

@@ -28,7 +28,8 @@ Output format (strictly follow this schema):
           "text": "What is the SI unit of electric current?",
           "options": ["Ampere", "Volt", "Ohm", "Watt"],
           "difficulty": "easy",
-          "marks": 1
+          "marks": 1,
+          "answer": "Ampere"
         }
       ]
     }
@@ -42,6 +43,10 @@ Rules:
 - The instruction should mention marks per question and what to attempt
 - If a question is a multiple-choice question (MCQ or Objective), you MUST provide an "options" array with the choices (usually 4 options).
 - Do NOT include the "options" array for subjective, short answer, or essay questions.
+- You MUST provide a precise, correct "answer" field for every question. 
+  - For MCQs, provide the correct option text. 
+  - For short answer questions, the answer MUST be detailed and at least 170 - 250 words.
+  - For long answer/essay questions, the answer MUST be highly detailed and at least 350 - 400 words.
 - Questions must be relevant, clear, and appropriate for school level
 - Total questions and marks must exactly match the distribution below
 

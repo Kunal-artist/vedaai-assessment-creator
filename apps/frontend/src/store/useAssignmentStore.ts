@@ -22,7 +22,7 @@ const defaultForm: FormState = {
   instructions: "",
   questionTypes: [
     { type: "Multiple Choice Questions", count: 4, marks: 1 },
-    { type: "Short Answer Questions", count: 3, marks: 4 },
+    { type: "Short Questions", count: 3, marks: 4 },
   ],
 };
 

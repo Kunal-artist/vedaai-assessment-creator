@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { MoreVertical, Eye, Trash2 } from "lucide-react";
+import { MoreVertical, Eye, Trash2, Sparkles, Clock } from "lucide-react";
 import { Assignment } from "../types";
 
 interface Props {
@@ -24,6 +24,19 @@ function fmt(dateStr: string) {
     month: "2-digit",
     year: "numeric",
   });
+}
+
+function timeAgo(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "Yesterday";
+  if (days < 7) return `${days}d ago`;
+  return fmt(dateStr);
 }
 
 export default function AssignmentCard({
@@ -52,6 +65,10 @@ export default function AssignmentCard({
     onDelete(assignment._id);
   };
 
+  const totalQuestions = assignment.result?.sections?.reduce(
+    (sum, sec) => sum + (sec.questions?.length ?? 0), 0
+  ) ?? 0;
+
   return (
     <article
       className={`assignment-card fade-in ${isSelected ? "selected" : ""}`}
@@ -59,7 +76,21 @@ export default function AssignmentCard({
       id={`card-${assignment._id}`}
     >
       <div className="card-header">
-        <h3 className="card-title">{assignment.title}</h3>
+        <div>
+          <h3 className="card-title">{assignment.title}</h3>
+          {assignment.subject && (
+            <span style={{
+              fontSize: 11,
+              color: "var(--text-muted)",
+              fontWeight: 500,
+              marginTop: 4,
+              display: "inline-block",
+            }}>
+              {assignment.subject}
+              {assignment.className ? ` • ${assignment.className}` : ""}
+            </span>
+          )}
+        </div>
         <div style={{ position: "relative" }}>
           <button
             className="card-menu-btn"
@@ -96,6 +127,12 @@ export default function AssignmentCard({
       </div>
 
       <div className="card-status-row">
+        <div className="card-ai-meta">
+          {assignment.status === "done" && totalQuestions > 0 && (
+            <span><Sparkles size={12} /> {totalQuestions} Qs</span>
+          )}
+          <span><Clock size={12} /> {timeAgo(assignment.createdAt)}</span>
+        </div>
         <span className={`status-badge ${assignment.status}`}>
           {STATUS_ICONS[assignment.status]} {assignment.status}
         </span>

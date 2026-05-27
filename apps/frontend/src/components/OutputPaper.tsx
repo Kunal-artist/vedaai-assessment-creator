@@ -1,8 +1,10 @@
 "use client";
 
-import { RefreshCw, Printer, ArrowLeft, AlertCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { RefreshCw, Printer, ArrowLeft, AlertCircle, Edit2, Check, Key } from "lucide-react";
 import { Assignment, Section, Question } from "../types";
 import { api } from "../lib/api";
+import { useAssignmentStore } from "../store/useAssignmentStore";
 
 interface Props {
   assignment: Assignment;
@@ -56,12 +58,20 @@ function PaperSection({ section, startNum }: { section: Section; startNum: numbe
         <h3 className="paper-section-title">{section.title}</h3>
         <div className="paper-section-line" />
       </div>
-      <p className="paper-section-instruction">{section.instruction}</p>
-      <ul className="question-list">
-        {section.questions.map((q, idx) => (
-          <QuestionItem key={idx} q={q} num={startNum + idx} />
-        ))}
-      </ul>
+      {section.instruction && (
+        <p className="paper-section-instruction">{section.instruction}</p>
+      )}
+      {section.questions && section.questions.length > 0 ? (
+        <ul className="question-list">
+          {section.questions.map((q, idx) => (
+            <QuestionItem key={idx} q={q} num={startNum + idx} />
+          ))}
+        </ul>
+      ) : (
+        <p style={{ fontStyle: "italic", fontSize: 13, color: "#94a3b8" }}>
+          No questions were generated for this section.
+        </p>
+      )}
     </div>
   );
 }
@@ -90,13 +100,41 @@ function GeneratingState({ status }: { status: string }) {
 }
 
 export default function OutputPaper({ assignment, onRegenerate, onBack }: Props) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [titleVal, setTitleVal] = useState(assignment.title);
+  const [showAnswers, setShowAnswers] = useState(false);
+  const { upsertAssignment } = useAssignmentStore();
+
   const sections = assignment.result?.sections ?? [];
   const isDone = assignment.status === "done" && sections.length > 0;
   const totalMarks = sections.reduce(
-    (sum, sec) => sum + sec.questions.reduce((s, q) => s + q.marks, 0),
+    (sum, sec) => sum + (sec.questions || []).reduce((s, q) => s + q.marks, 0),
     0
   );
-  const totalQuestions = sections.reduce((sum, sec) => sum + sec.questions.length, 0);
+  const totalQuestions = sections.reduce((sum, sec) => sum + (sec.questions || []).length, 0);
+
+  useEffect(() => {
+    if (isDone) {
+      const orig = document.title;
+      document.title = assignment.title ? `${assignment.title} - VedaAI Assessment` : "VedaAI Generated Assessment";
+      return () => { document.title = orig; };
+    }
+  }, [isDone, assignment.title]);
+
+  const handleSaveTitle = async () => {
+    if (!titleVal.trim() || titleVal === assignment.title) {
+      setIsEditing(false);
+      setTitleVal(assignment.title);
+      return;
+    }
+    try {
+      const res = await api.patch(`/assignments/${assignment._id}`, { title: titleVal });
+      upsertAssignment(res.data);
+      setIsEditing(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleRegenerate = async () => {
     try {
@@ -121,7 +159,41 @@ export default function OutputPaper({ assignment, onRegenerate, onBack }: Props)
             Back
           </button>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 16 }}>{assignment.title}</div>
+            {isEditing ? (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <input 
+                  autoFocus
+                  value={titleVal} 
+                  onChange={(e) => setTitleVal(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSaveTitle()}
+                  style={{ 
+                    fontWeight: 700, 
+                    fontSize: 16, 
+                    border: "1px solid var(--border)", 
+                    borderRadius: 4, 
+                    padding: "2px 6px",
+                    outline: "none"
+                  }}
+                />
+                <button 
+                  onClick={handleSaveTitle} 
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--brand)", padding: 0 }}
+                >
+                  <Check size={18} />
+                </button>
+              </div>
+            ) : (
+              <div style={{ fontWeight: 700, fontSize: 16, display: "flex", alignItems: "center", gap: 8 }}>
+                {assignment.title}
+                <button 
+                  onClick={() => setIsEditing(true)} 
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", padding: 0 }}
+                  aria-label="Rename"
+                >
+                  <Edit2 size={14} />
+                </button>
+              </div>
+            )}
             <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 1 }}>
               {assignment.subject} {assignment.className ? `• ${assignment.className}` : ""}
             </div>
@@ -135,10 +207,21 @@ export default function OutputPaper({ assignment, onRegenerate, onBack }: Props)
               Regenerate
             </button>
             {isDone && (
-              <button className="btn-primary" onClick={handlePrint} id="print-btn">
-                <Printer size={14} />
-                Download / Print
-              </button>
+              <>
+                <button 
+                  className={showAnswers ? "btn-primary" : "btn-outline"} 
+                  onClick={() => setShowAnswers(!showAnswers)} 
+                  id="toggle-answers-btn"
+                  style={{ minWidth: 140 }}
+                >
+                  <Key size={14} />
+                  {showAnswers ? "Hide Answers" : "Show Answers"}
+                </button>
+                <button className="btn-primary" onClick={handlePrint} id="print-btn">
+                  <Printer size={14} />
+                  Download / Print
+                </button>
+              </>
             )}
           </div>
         )}
@@ -212,12 +295,17 @@ export default function OutputPaper({ assignment, onRegenerate, onBack }: Props)
           {/* Content */}
           {!isDone ? (
             <GeneratingState status={assignment.status} />
+          ) : sections.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "60px 0", color: "#64748b" }}>
+              <p style={{ fontWeight: 500 }}>No sections generated.</p>
+              <p style={{ fontSize: 13 }}>Please regenerate the paper or modify your configuration.</p>
+            </div>
           ) : (
             (() => {
               let questionCounter = 1;
               return sections.map((section, idx) => {
                 const startNum = questionCounter;
-                questionCounter += section.questions.length;
+                questionCounter += (section.questions || []).length;
                 return (
                   <PaperSection
                     key={idx}
@@ -229,11 +317,47 @@ export default function OutputPaper({ assignment, onRegenerate, onBack }: Props)
             })()
           )}
 
+          {isDone && showAnswers && sections.length > 0 && (
+            <div className="answer-key-section" style={{ pageBreakBefore: "always", breakInside: "avoid" }}>
+              <h3 className="paper-section-title" style={{ marginBottom: 20 }}>Answer Key</h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                {(() => {
+                  let globalNum = 1;
+                  return sections.map((sec, sIdx) => {
+                    const startNum = globalNum;
+                    const qs = sec.questions || [];
+                    globalNum += qs.length;
+                    
+                    if (qs.length === 0) return null;
+
+                    return (
+                      <div key={`ans-sec-${sIdx}`}>
+                        <h4 style={{ fontSize: 12, fontWeight: 700, marginBottom: 8, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                          {sec.title}
+                        </h4>
+                        <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: 12 }}>
+                          {qs.map((q, qIdx) => (
+                            <li key={`ans-${qIdx}`} style={{ fontSize: 13, display: "flex", gap: 8, lineHeight: 1.5, breakInside: "avoid" }}>
+                              <span style={{ fontWeight: 600, minWidth: 24, color: "#0f172a", textAlign: "right" }}>{startNum + qIdx}.</span>
+                              <span style={{ color: "#334155" }}>
+                                {q.answer || <em style={{ color: "#94a3b8" }}>No answer provided</em>}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
+            </div>
+          )}
+
           {isDone && (
             <>
               <hr className="paper-divider" />
-              <p className="paper-footer">
-                — End of Question Paper — &nbsp;|&nbsp; VedaAI Assessment Creator
+              <p className="paper-footer" style={{ borderTop: "none", color: "#94a3b8", fontSize: 10 }}>
+                Generated by VedaAI
               </p>
             </>
           )}

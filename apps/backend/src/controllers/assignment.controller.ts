@@ -60,3 +60,17 @@ export const regenerateAssignment = async (req: Request, res: Response) => {
   await enqueueGenerationJob(String(assignment._id));
   res.json({ ok: true });
 };
+
+export const updateAssignment = async (req: Request, res: Response) => {
+  try {
+    const assignment = await Assignment.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    if (!assignment) return res.status(404).json({ message: "Not found" });
+    res.json(assignment);
+  } catch (err: any) {
+    res.status(400).json({ message: err.message ?? "Bad request" });
+  }
+};
