@@ -10,6 +10,8 @@ const schema = z.object({
   dueDate: z.string().min(1),
   instructions: z.string().optional(),
   sourceText: z.string().optional(),
+  sourceBase64: z.string().optional(),
+  sourceMimeType: z.string().optional(),
   questionTypes: z
     .array(
       z.object({
@@ -24,7 +26,10 @@ const schema = z.object({
 export const createAssignment = async (req: Request, res: Response) => {
   try {
     const payload = schema.parse(req.body);
-    const assignment = await Assignment.create({ ...payload, status: "queued" });
+    const assignment = await Assignment.create({
+      ...payload,
+      status: "queued",
+    });
     await enqueueGenerationJob(String(assignment._id));
     res.status(201).json(assignment);
   } catch (err: any) {

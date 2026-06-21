@@ -12,6 +12,8 @@ export const buildPrompt = (data: {
   dueDate: string;
   instructions?: string;
   questionTypes: QuestionTypeInput[];
+  /** True when an image or PDF is attached as an inline part alongside this prompt. */
+  hasAttachedFile?: boolean;
 }) => `
 You are an expert school exam paper creator. Generate a structured question paper as strict JSON.
 
@@ -57,7 +59,11 @@ Due date: ${data.dueDate}
 Question distribution (type → count × marks each):
 ${data.questionTypes.map((q) => `  - ${q.type}: ${q.count} questions × ${q.marks} marks each`).join("\n")}
 Additional instructions: ${data.instructions ?? "N/A"}
-Reference content / topic: ${data.sourceText ?? "General curriculum – generate appropriate questions based on subject and grade"}
+${
+  data.hasAttachedFile
+    ? "Reference content: An image or PDF document has been attached above. Read its content thoroughly and base all questions on the material in that document."
+    : `Reference content / topic: ${data.sourceText ?? "General curriculum – generate appropriate questions based on subject and grade"}`
+}
 
 Generate all ${data.questionTypes.reduce((s, q) => s + q.count, 0)} questions now:
 `;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, ChangeEvent, useMemo } from "react";
+import { useState, useRef, ChangeEvent, useMemo, useCallback } from "react";
 import {
   Upload,
   Plus,
@@ -48,6 +48,8 @@ export default function CreateAssignmentWizard({ onCreated, onCancel }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
+  const [sourceBase64, setSourceBase64] = useState<string | null>(null);
+  const [sourceMimeType, setSourceMimeType] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /* ── Reactive totals ──────────────────────────────────────── */
@@ -60,14 +62,33 @@ export default function CreateAssignmentWizard({ onCreated, onCancel }: Props) {
   );
 
   /* ── File handling ────────────────────────────────────────── */
-  const handleFile = (file: File) => {
+  const handleFile = useCallback((file: File) => {
     setFileName(file.name);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setForm("sourceText", (e.target?.result as string) ?? "");
-    };
-    reader.readAsText(file);
-  };
+    const isText = file.type === "text/plain" || file.name.endsWith(".txt");
+
+    if (isText) {
+      // Plain text: read as text and store in sourceText
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setForm("sourceText", (e.target?.result as string) ?? "");
+        setSourceBase64(null);
+        setSourceMimeType(null);
+      };
+      reader.readAsText(file);
+    } else {
+      // Images (PNG/JPG/JPEG) or PDFs: read as base64 and send to Gemini vision
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target?.result as string;
+        // dataUrl is like "data:image/png;base64,XXXX" – strip the prefix
+        const base64 = dataUrl.split(",")[1] ?? "";
+        setSourceBase64(base64);
+        setSourceMimeType(file.type || "application/octet-stream");
+        setForm("sourceText", ""); // clear plain text
+      };
+      reader.readAsDataURL(file);
+    }
+  }, [setForm]);
 
   const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -109,8 +130,13 @@ export default function CreateAssignmentWizard({ onCreated, onCancel }: Props) {
         sourceText: form.sourceText,
         instructions: form.instructions,
         questionTypes: form.questionTypes,
+        // Include base64 file data when an image or PDF was uploaded
+        ...(sourceBase64 ? { sourceBase64, sourceMimeType } : {}),
       });
       resetForm();
+      setSourceBase64(null);
+      setSourceMimeType(null);
+      setFileName(null);
       onCreated(res.data);
     } catch (e: any) {
       setError(
@@ -208,7 +234,7 @@ export default function CreateAssignmentWizard({ onCreated, onCancel }: Props) {
               <p className="upload-text">
                 Choose a file or drag &amp; drop it here
               </p>
-              <p className="upload-hint">JPEG, PNG, upto 10MB</p>
+              <p className="upload-hint">TXT, PDF, JPEG, PNG — up to 10 MB</p>
               <span className="upload-btn">
                 Browse Files
               </span>

@@ -17,6 +17,8 @@ const assignmentSchema = new Schema(
     dueDate: { type: Date, required: true },
     instructions: { type: String, default: "" },
     sourceText: { type: String, default: "" },
+    sourceBase64: { type: String, default: "" },
+    sourceMimeType: { type: String, default: "" },
     questionTypes: { type: [questionTypeSchema], required: true },
     status: {
       type: String,

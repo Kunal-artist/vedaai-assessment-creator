@@ -12,6 +12,7 @@ export const runGenerationJob = async (assignmentId: string) => {
     await assignment.save();
     emitAssignmentUpdate(String(assignment._id), { status: "processing" });
 
+    const hasAttachedFile = !!(assignment as any).sourceBase64;
     const prompt = buildPrompt({
       title: assignment.title,
       subject: (assignment as any).subject,
@@ -20,6 +21,7 @@ export const runGenerationJob = async (assignmentId: string) => {
       instructions: assignment.instructions,
       sourceText: assignment.sourceText,
       questionTypes: assignment.questionTypes,
+      hasAttachedFile,
     });
 
     let sections;
@@ -27,7 +29,11 @@ export const runGenerationJob = async (assignmentId: string) => {
     let delay = 10000; // start with 10s delay to handle 15 RPM limits better
     while (retries > 0) {
       try {
-        sections = await generateQuestionPaper(prompt);
+        sections = await generateQuestionPaper({
+          prompt,
+          sourceBase64: (assignment as any).sourceBase64 || undefined,
+          sourceMimeType: (assignment as any).sourceMimeType || undefined,
+        });
         break;
       } catch (e: any) {
         if (e?.status === 429 && retries > 1) {

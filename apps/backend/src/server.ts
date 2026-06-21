@@ -9,7 +9,7 @@ import { initQueue } from "./queues/generation.queue.js";
 
 const app = express();
 app.use(cors({ origin: env.FRONTEND_ORIGIN }));
-app.use(express.json({ limit: "5mb" }));
+app.use(express.json({ limit: "20mb" }));
 app.use("/api/assignments", assignmentRouter);
 
 const server = createServer(app);
