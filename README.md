@@ -4,6 +4,8 @@ A full-stack, AI-powered assessment creator designed to simplify the workflow fo
 
 This project was built to satisfy the VedaAI Full Stack Engineering Assignment.
 
+#### Frontend : https://vedaai-assessment-creator-frontend.vercel.app/
+
 ## 🚀 Key Features
 
 *   **Intelligent AI Generation:** Converts user input into a highly structured prompt to generate strictly formatted JSON from the Gemini API. Avoids raw text dumping.
